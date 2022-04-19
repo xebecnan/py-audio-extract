@@ -12,8 +12,8 @@ import win32api
 import win32clipboard
 import time
 
-SRC_DIR = r'C:\Users\arnan\Videos'
-PAGI_DIR = r'G:\dev\dev_arnan\py-audio-extract\pyautogui_images'
+SRC_DIR = os.path.join(os.path.expandvars('%USERPROFILE%'), 'Videos')
+PAGI_DIR = Path(__file__).resolve().parent.joinpath('pyautogui_images')
 TMP_WAV_PATH = 'tmp.wav'
 
 def convertMp4ToWav(src, dst):
