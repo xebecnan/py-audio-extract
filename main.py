@@ -11,6 +11,7 @@ import win32con
 import win32api
 import win32clipboard
 import time
+import argparse
 
 SRC_DIR = os.path.join(os.path.expandvars('%USERPROFILE%'), 'Videos')
 PAGI_DIR = Path(__file__).resolve().parent.joinpath('pyautogui_images')
@@ -143,7 +144,14 @@ def getTextFromClipboard():
     win32clipboard.CloseClipboard()
     return msg
 
-def getTextFromAnki():
+def setTextIntoClipboard(msg):
+    # 设置剪贴板文本
+    win32clipboard.OpenClipboard()
+    win32clipboard.EmptyClipboard()
+    win32clipboard.SetClipboardData(win32con.CF_UNICODETEXT, msg)
+    win32clipboard.CloseClipboard()
+
+def copyTextFromAnki():
     hwnd = findAnkiWindow()
     win32gui.ShowWindow(hwnd, 5)  # 5: SM_SHOW
     win32gui.SetForegroundWindow(hwnd)
@@ -153,10 +161,7 @@ def getTextFromAnki():
     pyautogui.click(location.x, location.y + offset)
     pressCtrlA()
     pressCtrlC()
-
     time.sleep(0.2)
-    msg = getTextFromClipboard()
-    return msg
 
 def startRecording():
     hwnd = findOBSWindow()
@@ -172,10 +177,7 @@ def startRecording():
 def stopRecording(location):
     pyautogui.click(location.x, location.y)
 
-def recordVoiceToMp4():
-    msg = getTextFromAnki()
-    print('msg:', msg)
-
+def pasteTextIntoGoogleTranslate():
     hwnd = findGoogleTranslateWindow()
     assert hwnd, '找不到 Google Translate 窗口'
     win32gui.ShowWindow(hwnd, 5)  # 5: SM_SHOW
@@ -185,6 +187,25 @@ def recordVoiceToMp4():
     pyautogui.click(location.x + 30, location.y + 100)
     pressCtrlA()
     pressCtrlV()
+    time.sleep(0.2)
+
+def copyTextFromGoogleTranslate():
+    hwnd = findGoogleTranslateWindow()
+    assert hwnd, '找不到 Google Translate 窗口'
+    win32gui.ShowWindow(hwnd, 5)  # 5: SM_SHOW
+    win32gui.SetForegroundWindow(hwnd)
+
+    location = findLocationByPng('GOOGLE_TRANSLATE_INPUT')
+    pyautogui.click(location.x + 30, location.y + 100)
+    pressCtrlA()
+    pressCtrlC()
+    time.sleep(0.2)
+
+def recordVoiceToMp4():
+    hwnd = findGoogleTranslateWindow()
+    assert hwnd, '找不到 Google Translate 窗口'
+    win32gui.ShowWindow(hwnd, 5)  # 5: SM_SHOW
+    win32gui.SetForegroundWindow(hwnd)
 
     location = findLocationByPng('GOOGLE_TRANSLATE_PLAY')
     assert location
@@ -194,11 +215,21 @@ def recordVoiceToMp4():
     time.sleep(5)
     stopRecording(obs_location)
 
-    return msg
-
 def main():
-    msg = recordVoiceToMp4().strip()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--msg-in-gt', action='store_true')
+    args = parser.parse_args()
+
+    if not args.msg_in_gt:
+        copyTextFromAnki()
+        pasteTextIntoGoogleTranslate()
+    else:
+        copyTextFromGoogleTranslate()
+
+    msg = getTextFromClipboard().strip()
     msg_dot = msg.endswith('.') and msg or msg + '.'
+
+    recordVoiceToMp4()
 
     path = [x for x in os.listdir(SRC_DIR) if x.lower().endswith('.mp4')][-1]
     print('path:', path)
