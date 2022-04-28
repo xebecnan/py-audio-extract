@@ -215,21 +215,32 @@ def recordVoiceToMp4():
     time.sleep(5)
     stopRecording(obs_location)
 
+def copyTextFromMp4():
+    path = [x for x in os.listdir(SRC_DIR) if x.lower().endswith('.mp4')][-1]
+    print('copyTextFromMp4:', path)
+    msg = path[:-4]
+    setTextIntoClipboard(msg)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--msg-in-gt', action='store_true')
+    parser.add_argument('--msg-in-mp4', action='store_true')
     args = parser.parse_args()
 
-    if not args.msg_in_gt:
+    if args.msg_in_mp4:
+        copyTextFromMp4()
+    elif not args.msg_in_gt:
         copyTextFromAnki()
         pasteTextIntoGoogleTranslate()
     else:
         copyTextFromGoogleTranslate()
 
     msg = getTextFromClipboard().strip()
-    msg_dot = msg.endswith('.') and msg or msg + '.'
+    msg_fix = msg.replace(':', '.').replace('?', '.')
+    msg_dot = msg_fix.endswith('.') and msg_fix or msg_fix + '.'
 
-    recordVoiceToMp4()
+    if not args.msg_in_mp4:
+        recordVoiceToMp4()
 
     path = [x for x in os.listdir(SRC_DIR) if x.lower().endswith('.mp4')][-1]
     print('path:', path)
