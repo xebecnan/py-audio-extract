@@ -28,16 +28,29 @@ def removeSilentFromData(data):
     min_threshold = int(np.min(data) * 0.01)
     max_threshold = int(np.max(data) * 0.01)
     retbuf = np.empty(shape=[0, 2], dtype=np.int16)
+
+    sounds = []
+    start_index = None
+    end_index = None
+
     for i in range(0, len(data), step):
         window = data[i:i+step]
         # print(window.shape[1])
         # print('i:', i, i+step)
-        if np.min(window) <= min_threshold or np.max(window) >= max_threshold:
-            scnt = 0
-        else:
-            scnt += 1
-        if scnt < 5:
+        tag = np.min(window) <= min_threshold or np.max(window) >= max_threshold
+        index = len(sounds)
+        sounds.append(window)
+        if tag:
+            if not start_index:
+                start_index = index
+            end_index = index
+
+    # 掐头去尾
+    for i in range(0, len(sounds)):
+        if start_index <= i + 5 and i - 5 <= end_index:
+            window = sounds[i]
             retbuf = np.append(retbuf, window, axis=0)
+
     return retbuf
 
 def removeSilent(src_wav, dst_wav):
