@@ -249,6 +249,7 @@ def main():
     print('path:', path)
     path = os.path.join(SRC_DIR, path)
     mp3_path = os.path.join(SRC_DIR, f'{msg_dot}mp3')
+    print('mp3_path:', mp3_path)
 
     time.sleep(1)
     print('isfile:', os.path.isfile(path), 'path:', path)
