@@ -228,7 +228,10 @@ def main():
     args = parser.parse_args()
 
     if args.msg_in_mp4:
-        copyTextFromMp4()
+        # 优先使用剪贴板中的文本
+        msg = getTextFromClipboard()
+        if not msg:
+            copyTextFromMp4()
     elif not args.msg_in_gt:
         copyTextFromAnki()
         pasteTextIntoGoogleTranslate()
@@ -236,7 +239,7 @@ def main():
         copyTextFromGoogleTranslate()
 
     msg = getTextFromClipboard().strip()
-    msg_fix = msg.replace(':', '.').replace('?', '.')
+    msg_fix = msg.replace(':', '.').replace('?', '.').replace('\r\n', ' ').replace('\n', ' ').replace('\r', '')
     msg_dot = msg_fix.endswith('.') and msg_fix or msg_fix + '.'
 
     if not args.msg_in_mp4:
