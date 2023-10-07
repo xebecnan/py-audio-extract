@@ -247,25 +247,25 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--msg-in-gt', action='store_true')
     parser.add_argument('--msg-in-mp4', action='store_true')
+    parser.add_argument('--msg-in-anki', action='store_true')
     args = parser.parse_args()
 
     if args.msg_in_mp4:
-        # 优先使用剪贴板中的文本
-        msg = getTextFromClipboard()
-        if not msg:
-            copyTextFromMp4()
-    elif not args.msg_in_gt:
-        copyTextFromAnki()
-        pasteTextIntoGoogleTranslate()
-    else:
+        copyTextFromMp4()
+    elif args.msg_in_gt:
         copyTextFromGoogleTranslate()
+    elif args.msg_in_anki:
+        copyTextFromAnki()
+    else:
+        # 默认使用剪贴板中的文本
+        pass
 
     msg = getTextFromClipboard().strip()
     msg_fix = msg.replace(':', '.').replace('?', '.').replace('\r\n', ' ').replace('\n', ' ').replace('\r', '')
     msg_dot = msg_fix.endswith('.') and msg_fix or msg_fix + '.'
 
-    if not args.msg_in_mp4:
-        recordVoiceToMp4()
+    # if not args.msg_in_mp4:
+    #     recordVoiceToMp4()
 
     path = [x for x in os.listdir(SRC_DIR) if x.lower().endswith('.mp4')][-1]
     print('path:', path)
