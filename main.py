@@ -12,8 +12,17 @@ import win32api
 import win32clipboard
 import time
 import argparse
+import ctypes.wintypes
 
-SRC_DIR = os.path.join(os.path.expandvars('%USERPROFILE%'), 'Videos')
+def getSrcDir():
+    '参考 https://stackoverflow.com/questions/3858851/how-to-get-windows-special-folders-for-currently-logged-in-user'
+    CSIDL_MYVIDEO = 0x000e
+    SHGFP_TYPE_CURRENT= 0   # Want current, not default value
+    buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+    ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_MYVIDEO, 0, SHGFP_TYPE_CURRENT, buf)
+    return buf.value
+
+SRC_DIR = getSrcDir()
 PAGI_DIR = Path(__file__).resolve().parent.joinpath('pyautogui_images')
 TMP_WAV_PATH = 'tmp.wav'
 
