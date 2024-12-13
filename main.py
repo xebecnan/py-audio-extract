@@ -67,6 +67,44 @@ def removeSilent(src_wav, dst_wav):
     retbuf = removeSilentFromData(data)
     wavfile.write(dst_wav, fs, retbuf)
 
+
+def autoAmplifyVolume(src_wav, dst_wav):
+    # Read the WAV file
+    fs, data = wavfile.read(src_wav)
+
+    # Check if the data is in a format that can be amplified
+    if data.dtype != 'int16':
+        raise ValueError("The WAV file does not contain 16-bit PCM samples.")
+
+    # Compute the maximum possible amplitude for int16 data
+    max_amplitude = 32767
+
+    # Find the maximum absolute value of the audio data
+    max_abs_value = np.max(np.abs(data))
+
+    # If the maximum absolute value is already at or exceeds the limit, no amplification is needed
+    if max_abs_value >= max_amplitude:
+        print("Audio is already at maximum volume or has clipping. No amplification applied.")
+        wavfile.write(dst_wav, fs, data)
+        return
+
+    # Calculate the amplification factor to normalize the audio to the maximum amplitude
+    if max_abs_value == 0:
+        print("Audio contains only silence. Cannot amplify.")
+        return
+    amplification_factor = max_amplitude / max_abs_value
+
+    # Apply the amplification factor
+    data = (data.astype(float) * amplification_factor).astype(int)
+
+    # Clip the data to prevent overflow when converting back to int16
+    data = np.clip(data, -max_amplitude, max_amplitude)
+
+    # Convert back to int16 and write to the destination WAV file
+    data = data.astype(np.int16)
+    wavfile.write(dst_wav, fs, data)
+
+
 def convertWavToMp3(src, dst):
     audio = moviepy.editor.AudioFileClip(src)
     audio.write_audiofile(dst)
@@ -277,6 +315,7 @@ def main():
     print('isfile:', os.path.isfile(path), 'path:', path)
     convertMp4ToWav(path, TMP_WAV_PATH)
     removeSilent(TMP_WAV_PATH, TMP_WAV_PATH)
+    autoAmplifyVolume(TMP_WAV_PATH, TMP_WAV_PATH)
     convertWavToMp3(TMP_WAV_PATH, mp3_path)
     os.remove(TMP_WAV_PATH)
 
