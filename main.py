@@ -14,7 +14,7 @@ import time
 import argparse
 import ctypes.wintypes
 
-def getSrcDir():
+def getMyVideoDir():
     '参考 https://stackoverflow.com/questions/3858851/how-to-get-windows-special-folders-for-currently-logged-in-user'
     CSIDL_MYVIDEO = 0x000e
     SHGFP_TYPE_CURRENT= 0   # Want current, not default value
@@ -22,7 +22,7 @@ def getSrcDir():
     ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_MYVIDEO, 0, SHGFP_TYPE_CURRENT, buf)
     return buf.value
 
-SRC_DIR = getSrcDir()
+MY_VIDEO_DIR = getMyVideoDir()
 PAGI_DIR = Path(__file__).resolve().parent.joinpath('pyautogui_images')
 TMP_WAV_PATH = 'tmp.wav'
 
@@ -238,7 +238,7 @@ def recordVoiceToMp4():
     stopRecording(obs_location)
 
 def copyTextFromMp4():
-    path = [x for x in os.listdir(SRC_DIR) if x.lower().endswith('.mp4')][-1]
+    path = [x for x in os.listdir(MY_VIDEO_DIR) if x.lower().endswith('.mp4')][-1]
     print('copyTextFromMp4:', path)
     msg = path[:-4]
     setTextIntoClipboard(msg)
@@ -267,10 +267,10 @@ def main():
     # if not args.msg_in_mp4:
     #     recordVoiceToMp4()
 
-    path = [x for x in os.listdir(SRC_DIR) if x.lower().endswith('.mp4')][-1]
+    path = [x for x in os.listdir(MY_VIDEO_DIR) if x.lower().endswith('.mp4')][-1]
     print('path:', path)
-    path = os.path.join(SRC_DIR, path)
-    mp3_path = os.path.join(SRC_DIR, f'{msg_dot}mp3')
+    path = os.path.join(MY_VIDEO_DIR, path)
+    mp3_path = os.path.join(MY_VIDEO_DIR, f'{msg_dot}mp3')
     print('mp3_path:', mp3_path)
 
     time.sleep(1)
